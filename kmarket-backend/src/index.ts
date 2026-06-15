@@ -1,5 +1,5 @@
 import "reflect-metadata";
-import { serve } from "@hono/node-server";
+import { serve as honoServe, serveStatic } from "@hono/node-server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { AppDataSource } from "./config/database";
@@ -18,9 +18,11 @@ const app = new Hono();
 // Enable CORS for frontend
 app.use("/*", cors());
 
-app.get("/", (c) => {
-    return c.text("Welcome to KMarket API");
-});
+// Serve static files from the compiled frontend build
+app.use("/*", serveStatic({ root: "./public" }));
+
+// Fallback: serve index.html for the root and any unmatched routes (SPA support)
+app.get("/", serveStatic({ path: "./public/index.html" }));
 
 // Initialize DB and routes
 AppDataSource.initialize()
@@ -44,7 +46,7 @@ AppDataSource.initialize()
         const port = parseInt(process.env.PORT || "3000");
         console.log(`Server is running on port ${port}`);
 
-        serve({
+        honoServe({
             fetch: app.fetch,
             port
         });
