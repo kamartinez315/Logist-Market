@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "tsx watch src/index.ts",
-    "build": "cd ../kmarket.example && npm install && npm run build && cp -r dist ../kmarket-backend/public",
+    "build": "npm install --prefix ../../kmarket.example && npm run build --prefix ../../kmarket.example && mkdir -p ./public && cp -r ../../kmarket.example/dist ./public",
     "start": "npm run build && tsx src/index.ts"
   },
   "keywords": [],
