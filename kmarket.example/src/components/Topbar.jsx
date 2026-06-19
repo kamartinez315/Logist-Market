@@ -55,9 +55,13 @@ export default function Topbar({ activePage, collapsed, setCollapsed }) {
         <div className="topbar-user" ref={menuRef} onClick={() => setShowMenu(!showMenu)}>
           <div
             className="avatar avatar-sm"
-            style={{ background: '#2d8a4e', color: '#fff', cursor: 'pointer' }}
+            style={{ background: '#2d8a4e', color: '#fff', cursor: 'pointer', overflow: 'hidden' }}
           >
-            {user?.avatar || (user?.name ? user.name[0].toUpperCase() : '?')}
+            {user?.avatar && (user.avatar.startsWith('/') || user.avatar.startsWith('http')) ? (
+              <img src={user.avatar} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            ) : (
+              user?.avatar || (user?.name ? user.name[0].toUpperCase() : '?')
+            )}
           </div>
           <div className="topbar-user-info">
             <span className="topbar-user-name">{user?.name?.split(' ').slice(0, 2).join(' ') || 'Usuario'}</span>

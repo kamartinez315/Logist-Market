@@ -1,10 +1,14 @@
 import { Hono } from "hono";
 import { AppEnv } from "../types";
 import bcrypt from "bcryptjs";
+import fs from "fs";
+import path from "path";
 import { UserRepository } from "../repositories/UserRepository";
 import { BusinessRepository } from "../repositories/BusinessRepository";
 import { UserBusinessRepository } from "../repositories/UserBusinessRepository";
 import { generateToken, authMiddleware } from "../middleware/auth";
+import { AppDataSource } from "../config/database";
+import { RegistrationLog } from "../entities/RegistrationLog";
 
 export class AuthController {
     private userRepo = new UserRepository();
@@ -44,6 +48,12 @@ export class AuthController {
                     userId: user.id,
                     businessId: business.id,
                     role: "owner",
+                });
+
+                await AppDataSource.getRepository(RegistrationLog).save({
+                    userName: name,
+                    userEmail: email,
+                    businessName: businessName,
                 });
 
                 const token = generateToken({ userId: user.id, businessId: business.id });
@@ -123,6 +133,47 @@ export class AuthController {
             } catch (error) {
                 console.error("Error logging in:", error);
                 return c.json({ error: "Error al iniciar sesión" }, 500);
+            }
+        });
+
+        this.router.post("/avatar", authMiddleware, async (c) => {
+            try {
+                const userId = c.get("userId");
+                const body = await c.req.parseBody();
+                const file = body["avatar"] as File;
+
+                if (!file) {
+                    return c.json({ error: "No se envió ninguna imagen" }, 400);
+                }
+
+                const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+                if (!allowedTypes.includes(file.type)) {
+                    return c.json({ error: "Tipo de archivo no válido. Solo se permiten imágenes (JPEG, PNG, GIF, WebP)" }, 400);
+                }
+
+                const maxSize = 5 * 1024 * 1024;
+                if (file.size > maxSize) {
+                    return c.json({ error: "La imagen no puede superar los 5MB" }, 400);
+                }
+
+                const ext = file.name.split(".").pop();
+                const filename = `avatar-${userId}-${Date.now()}.${ext}`;
+                const uploadDir = path.join(process.cwd(), "public", "uploads");
+
+                if (!fs.existsSync(uploadDir)) {
+                    fs.mkdirSync(uploadDir, { recursive: true });
+                }
+
+                const buffer = Buffer.from(await file.arrayBuffer());
+                fs.writeFileSync(path.join(uploadDir, filename), buffer);
+
+                const avatarUrl = `/uploads/${filename}`;
+                await this.userRepo.update(userId, { avatar: avatarUrl });
+
+                return c.json({ avatar: avatarUrl });
+            } catch (error) {
+                console.error("Error uploading avatar:", error);
+                return c.json({ error: "Error al subir la imagen" }, 500);
             }
         });
 

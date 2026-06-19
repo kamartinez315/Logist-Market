@@ -10,6 +10,7 @@ import { Expense } from "../entities/Expense";
 import { Business } from "../entities/Business";
 import { User } from "../entities/User";
 import { UserBusiness } from "../entities/UserBusiness";
+import { RegistrationLog } from "../entities/RegistrationLog";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -24,14 +25,12 @@ export const AppDataSource = new DataSource(
         ? {
               type: "postgres",
               url: envDbUrl,
-              synchronize: dbSync,
-              logging: false,
-              entities: [Product, Client, Sale, SaleDetail, InventoryMovement, Setting, Expense, Business, User, UserBusiness],
-              subscribers: [],
-              migrations: [],
-              extra: {
-                  ssl: process.env.DB_SSL === "true" ? { rejectUnauthorized: false } : false,
-              },
+               synchronize: dbSync,
+               logging: false,
+               entities: [Product, Client, Sale, SaleDetail, InventoryMovement, Setting, Expense, Business, User, UserBusiness, RegistrationLog],
+               ssl: { rejectUnauthorized: false },
+               subscribers: [],
+               migrations: [],
           }
         : {
               type: "postgres",
@@ -42,7 +41,7 @@ export const AppDataSource = new DataSource(
               database: process.env.DB_NAME || "Kmarket",
               synchronize: dbSync,
               logging: false,
-              entities: [Product, Client, Sale, SaleDetail, InventoryMovement, Setting, Expense, Business, User, UserBusiness],
+              entities: [Product, Client, Sale, SaleDetail, InventoryMovement, Setting, Expense, Business, User, UserBusiness, RegistrationLog],
               subscribers: [],
               migrations: [],
           }

@@ -196,6 +196,22 @@ export const updateExpense = async (id, expense) => {
     return res.json();
 };
 
+export const uploadAvatar = async (file) => {
+    const formData = new FormData();
+    formData.append('avatar', file);
+    const token = localStorage.getItem('token');
+    const res = await fetch(`${API_URL}/auth/avatar`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+    });
+    if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || 'Error al subir avatar');
+    }
+    return res.json();
+};
+
 export const deleteExpense = async (id) => {
     const res = await fetch(`${API_URL}/expenses/${id}`, {
         method: "DELETE",

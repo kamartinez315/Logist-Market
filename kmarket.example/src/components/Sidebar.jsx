@@ -75,9 +75,13 @@ export default function Sidebar({ activePage, setActivePage, collapsed, setColla
       <div className="sidebar-user">
         <div
           className="avatar avatar-sm"
-          style={{ background: '#2d8a4e', color: '#fff', flexShrink: 0 }}
+          style={{ background: '#2d8a4e', color: '#fff', flexShrink: 0, overflow: 'hidden' }}
         >
-          {user?.avatar || (user?.name ? user.name[0].toUpperCase() : '?')}
+          {user?.avatar && (user.avatar.startsWith('/') || user.avatar.startsWith('http')) ? (
+            <img src={user.avatar} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          ) : (
+            user?.avatar || (user?.name ? user.name[0].toUpperCase() : '?')
+          )}
         </div>
         {!collapsed && (
           <div className="sidebar-user-info">
