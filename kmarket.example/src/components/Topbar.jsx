@@ -65,7 +65,7 @@ export default function Topbar({ activePage, collapsed, setCollapsed }) {
           </div>
           <div className="topbar-user-info">
             <span className="topbar-user-name">{user?.name?.split(' ').slice(0, 2).join(' ') || 'Usuario'}</span>
-            <span className="topbar-user-role">{user?.businessName || 'Logistics Market'}</span>
+            <span className="topbar-user-role">{user?.businesses?.[0]?.name || 'Logistics Market'}</span>
           </div>
           <ChevronDown size={12} style={{ color: 'var(--text-muted)', marginLeft: 2 }} />
 
