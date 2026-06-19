@@ -196,6 +196,16 @@ export const updateExpense = async (id, expense) => {
     return res.json();
 };
 
+export const updateBusinessName = async (name) => {
+    const res = await fetch(`${API_URL}/business`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ name }),
+    });
+    if (!res.ok) throw new Error("Failed to update business name");
+    return res.json();
+};
+
 export const uploadAvatar = async (file) => {
     const formData = new FormData();
     formData.append('avatar', file);

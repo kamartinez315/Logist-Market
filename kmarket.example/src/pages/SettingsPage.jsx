@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { fetchSettings, updateSettings, uploadAvatar } from '../api/apiClient';
+import { fetchSettings, updateSettings, uploadAvatar, updateBusinessName } from '../api/apiClient';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/Toast';
 
 export default function SettingsPage() {
-  const { user, updateUserAvatar } = useAuth();
+  const { user, updateUserAvatar, updateUserBusinessName } = useAuth();
   const toast = useToast();
   const [activeTab, setActiveTab] = useState('general');
   const [loading, setLoading] = useState(true);
   const fileInputRef = useRef(null);
 
-  const [shopName, setShopName] = useState('Logistics Market');
+  const [shopName, setShopName] = useState(user?.businesses?.[0]?.name || 'Logistics Market');
   const [currency, setCurrency] = useState('DOP');
 
   const [darkMode, setDarkMode] = useState(localStorage.getItem('theme') === 'dark');
@@ -35,6 +35,8 @@ export default function SettingsPage() {
     e.preventDefault();
     try {
       await updateSettings({ shopName, currency });
+      await updateBusinessName(shopName);
+      updateUserBusinessName(shopName);
       toast('Configuraciones guardadas exitosamente.', 'success');
     } catch (err) {
       console.error(err);

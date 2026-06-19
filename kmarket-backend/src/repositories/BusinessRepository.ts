@@ -12,4 +12,8 @@ export class BusinessRepository {
     async findById(id: number): Promise<Business | null> {
         return this.repo.findOneBy({ id });
     }
+
+    async update(id: number, data: Partial<Business>): Promise<void> {
+        await this.repo.update(id, data);
+    }
 }

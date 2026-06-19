@@ -75,8 +75,16 @@ export function AuthProvider({ children }) {
     setUser(prev => prev ? { ...prev, avatar } : prev);
   }, []);
 
+  const updateUserBusinessName = useCallback((name) => {
+    setUser(prev => {
+      if (!prev) return prev;
+      const businesses = prev.businesses?.map((b, i) => i === 0 ? { ...b, name } : b) || [];
+      return { ...prev, businesses };
+    });
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, logout, updateUserAvatar }}>
+    <AuthContext.Provider value={{ user, token, loading, login, register, logout, updateUserAvatar, updateUserBusinessName }}>
       {children}
     </AuthContext.Provider>
   );

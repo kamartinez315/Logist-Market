@@ -15,6 +15,7 @@ import { ReportController } from "./controllers/ReportController";
 import { SettingController } from "./controllers/SettingController";
 import { ExpenseController } from "./controllers/ExpenseController";
 import { RegistrationLogController } from "./controllers/RegistrationLogController";
+import { BusinessController } from "./controllers/BusinessController";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -58,6 +59,7 @@ AppDataSource.initialize()
         const settingController = new SettingController();
         const expenseController = new ExpenseController();
         const registrationLogController = new RegistrationLogController();
+        const businessController = new BusinessController();
 
         app.route("/api/auth", authController.router);
         app.route("/api/products", productController.router);
@@ -68,6 +70,7 @@ AppDataSource.initialize()
         app.route("/api/settings", settingController.router);
         app.route("/api/expenses", expenseController.router);
         app.route("/api/registration-logs", registrationLogController.router);
+        app.route("/api/business", businessController.router);
 
         // Serve static assets from public/ directory
         app.use("/*", serveStatic({ root: "./public" }));
