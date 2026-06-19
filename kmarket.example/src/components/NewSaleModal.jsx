@@ -12,6 +12,43 @@ export default function NewSaleModal({ onClose, onSave }) {
   const [selectedProduct, setSelectedProduct] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [saleDate, setSaleDate] = useState('');
+  const [dateText, setDateText] = useState('');
+
+  function formatDateInput(value) {
+    const digits = value.replace(/\D/g, '').slice(0, 8);
+    if (digits.length <= 2) return digits;
+    if (digits.length <= 4) return digits.slice(0, 2) + '/' + digits.slice(2);
+    return digits.slice(0, 2) + '/' + digits.slice(2, 4) + '/' + digits.slice(4);
+  }
+
+  function isValidDate(dd, mm, yyyy) {
+    if (mm < 1 || mm > 12) return false;
+    const daysInMonth = new Date(yyyy, mm, 0).getDate();
+    if (dd < 1 || dd > daysInMonth) return false;
+    return true;
+  }
+
+  function handleDateInput(e) {
+    const formatted = formatDateInput(e.target.value);
+    setDateText(formatted);
+    if (formatted.length === 10) {
+      const [d, m, y] = formatted.split('/').map(Number);
+      if (isValidDate(d, m, y)) {
+        const iso = y + '-' + String(m).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+        setSaleDate(iso);
+      } else {
+        setSaleDate('');
+      }
+    } else {
+      setSaleDate('');
+    }
+  }
+
+  function handleClearDate() {
+    setDateText('');
+    setSaleDate('');
+  }
 
   useEffect(() => {
     async function loadData() {
@@ -83,7 +120,8 @@ export default function NewSaleModal({ onClose, onSave }) {
           quantity: i.quantity,
           unitPrice: i.unitPrice,
           subtotal: i.subtotal
-        }))
+        })),
+        saleDate: saleDate || null
       };
 
       await createSale(saleData);
@@ -124,7 +162,7 @@ export default function NewSaleModal({ onClose, onSave }) {
               </div>
               <div className="form-group" style={{ width: 80 }}>
                 <label className="form-label">Cant.</label>
-                <input className="form-input" type="number" min="1" value={quantity} onChange={e => setQuantity(parseInt(e.target.value) || 1)} />
+                <input className="form-input" type="number" min="1" value={quantity} onChange={e => setQuantity(Math.max(1, parseInt(e.target.value) || 1))} />
               </div>
               <button type="button" className="btn btn-secondary" onClick={addItem} style={{ height: 42 }}>➕</button>
             </div>
@@ -180,6 +218,42 @@ export default function NewSaleModal({ onClose, onSave }) {
                 <option value="card">Tarjeta</option>
                 <option value="transfer">Transferencia</option>
               </select>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Fecha de Venta (Opcional)</label>
+              <div style={{ position: 'relative' }}>
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="DD/MM/AAAA"
+                  value={dateText}
+                  onChange={handleDateInput}
+                  maxLength={10}
+                  style={{
+                    paddingRight: 36,
+                    borderColor: dateText.length === 10 && !saleDate ? '#ef4444' : undefined
+                  }}
+                />
+                <span style={{
+                  position: 'absolute', right: 10, top: '50%',
+                  transform: 'translateY(-50%)',
+                  fontSize: 16, color: 'var(--text-muted)', pointerEvents: 'none'
+                }}>📅</span>
+                {dateText && (
+                  <span
+                    onClick={handleClearDate}
+                    style={{
+                      position: 'absolute', right: 32, top: '50%',
+                      transform: 'translateY(-50%)',
+                      cursor: 'pointer', fontSize: 12, color: 'var(--accent-rose)',
+                      lineHeight: 1, fontWeight: 600
+                    }}
+                  >
+                    ✕
+                  </span>
+                )}
+              </div>
             </div>
 
             <div style={{ marginTop: 'auto', paddingTop: 24, borderTop: '1px solid var(--border-color)' }}>

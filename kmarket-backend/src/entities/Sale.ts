@@ -5,6 +5,9 @@ export class Sale {
     @PrimaryGeneratedColumn()
     id: number;
 
+    @Column("int")
+    businessId: number;
+
     @Column("int", { nullable: true })
     clientId: number | null; // null represents a walk-in/unregistered customer
 
@@ -17,7 +20,10 @@ export class Sale {
     @Column("varchar", { default: "cash" })
     paymentMethod: string;
 
-    @CreateDateColumn()
+    @Column("date", { nullable: true })
+    saleDate: Date | null;
+
+    @Column("timestamp", { default: () => "CURRENT_TIMESTAMP" })
     createdAt: Date;
 
     @UpdateDateColumn()

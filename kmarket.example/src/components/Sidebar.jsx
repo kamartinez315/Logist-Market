@@ -1,5 +1,5 @@
 import React from 'react';
-import { DEMO_USER } from '../data/mockData';
+import { useAuth } from '../context/AuthContext';
 
 const navItems = [
   {
@@ -15,27 +15,28 @@ const navItems = [
       { id: 'clients', label: 'Clientes', icon: '◉' },
       { id: 'products', label: 'Productos', icon: '▢' },
       { id: 'inventory', label: 'Inventario', icon: '▥' },
+      { id: 'expenses', label: 'Gastos', icon: '💰' },
     ],
   },
   {
     section: 'Reportes',
     items: [
-      { id: 'reports', label: 'Reportes', icon: '▧' },
+      { id: 'history', label: 'Historial', icon: '📋' },
       { id: 'settings', label: 'Configuración', icon: '⚙' },
     ],
   },
 ];
 
 export default function Sidebar({ activePage, setActivePage, collapsed, setCollapsed }) {
+  const { user, logout } = useAuth();
+
   return (
     <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
-      {/* Logo */}
       <div className="sidebar-logo">
         <div className="logo-mark">K</div>
-        {!collapsed && <span className="logo-text">KMarket</span>}
+        {!collapsed && <span className="logo-text">{user?.businessName || 'KMarket'}</span>}
       </div>
 
-      {/* Collapse toggle */}
       <button
         className="sidebar-collapse-btn"
         onClick={() => setCollapsed(!collapsed)}
@@ -44,7 +45,6 @@ export default function Sidebar({ activePage, setActivePage, collapsed, setColla
         <span style={{ display: 'inline-block', transform: collapsed ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }}>‹</span>
       </button>
 
-      {/* Navigation */}
       <nav className="sidebar-nav">
         {navItems.map((section) => (
           <div key={section.section} className="nav-section">
@@ -69,20 +69,26 @@ export default function Sidebar({ activePage, setActivePage, collapsed, setColla
         ))}
       </nav>
 
-      {/* User info at bottom */}
       <div className="sidebar-user">
         <div
           className="avatar avatar-sm"
           style={{ background: '#2d8a4e', color: '#fff', flexShrink: 0 }}
         >
-          {DEMO_USER.avatar}
+          {user?.avatar || (user?.name ? user.name[0].toUpperCase() : '?')}
         </div>
         {!collapsed && (
           <div className="sidebar-user-info">
-            <div className="sidebar-user-name">{DEMO_USER.name.split(' ')[0]} {DEMO_USER.name.split(' ')[1]}</div>
-            <div className="sidebar-user-role">{DEMO_USER.role}</div>
+            <div className="sidebar-user-name">{user?.name || 'Usuario'}</div>
+            <div className="sidebar-user-role">{user?.businessName || 'KMarket'}</div>
           </div>
         )}
+        <button
+          className="sidebar-logout-btn"
+          onClick={logout}
+          title="Cerrar sesión"
+        >
+          ⏻
+        </button>
       </div>
     </aside>
   );

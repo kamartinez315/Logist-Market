@@ -1,0 +1,11 @@
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+.env
+**/.env
+kmarket-backend/public/
+.git/
+*.log
+.vscode/
+.idea/

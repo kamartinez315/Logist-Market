@@ -6,22 +6,27 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "tsx watch src/index.ts",
-    "build": "npm install --prefix ../kmarket.example && npm run build --prefix ../kmarket.example && mkdir -p ./public && cp -r ../kmarket.example/dist ./public",
-    "start": "npm run build && tsx src/index.ts"
+    "db:reset": "tsx src/scripts/reset-db.ts",
+    "build": "node -e \"const fs = require('fs'); const cp = require('child_process'); if (fs.existsSync('../kmarket.example')) { console.log('Building frontend...'); cp.execSync('npm install --prefix ../kmarket.example && npm run build --prefix ../kmarket.example', {stdio: 'inherit'}); fs.mkdirSync('./public', { recursive: true }); if (process.platform === 'win32') { cp.execSync('xcopy /E /I /Y ..\\\\kmarket.example\\\\dist .\\\\public', {stdio: 'inherit'}); } else { cp.execSync('cp -r ../kmarket.example/dist/* ./public/', {stdio: 'inherit'}); } } else { console.log('Frontend folder not found, skipping frontend build.'); }\"",
+    "start": "tsx src/index.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@hono/node-server": "^2.0.4",
+    "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "hono": "^4.12.25",
+    "jsonwebtoken": "^9.0.3",
     "pg": "^8.21.0",
     "reflect-metadata": "^0.2.2",
     "typeorm": "^1.0.0"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.9.3",
     "tsx": "^4.22.4",
     "typescript": "^6.0.3"

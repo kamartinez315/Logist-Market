@@ -9,6 +9,9 @@ export class SaleDetail {
     saleId: number;
 
     @Column("int")
+    businessId: number;
+
+    @Column("int")
     productId: number;
 
     @Column("int")
@@ -19,4 +22,7 @@ export class SaleDetail {
 
     @Column("decimal", { precision: 10, scale: 2 })
     subtotal: number;
+
+    @Column("decimal", { precision: 10, scale: 2, default: 0 })
+    unitCost: number;
 }

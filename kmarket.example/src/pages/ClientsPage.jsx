@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { fetchClients, createClient, updateClient, deleteClient } from '../api/apiClient';
+import { useDebounce } from '../hooks/useDebounce';
+import { useToast } from '../components/Toast';
+import { SkeletonPage } from '../components/Skeleton';
 
 const CLIENT_STATUSES = [
   { value: 'active', label: 'Activo' },
@@ -76,17 +79,9 @@ function ClientModal({ client, onClose, onSave }) {
               </div>
             </div>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label className="form-label">Nombre completo *</label>
-                <input className="form-input" value={form.name} onChange={e => set('name', e.target.value)} placeholder="Ej. María López" required />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Estado</label>
-                <select className="form-select" value={form.status} onChange={e => set('status', e.target.value)}>
-                  {CLIENT_STATUSES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
-                </select>
-              </div>
+            <div className="form-group">
+              <label className="form-label">Nombre completo *</label>
+              <input className="form-input" value={form.name} onChange={e => set('name', e.target.value)} placeholder="Ej. María López" required />
             </div>
 
             <div className="form-row">
@@ -218,6 +213,11 @@ export default function ClientsPage() {
   const [modal, setModal] = useState(null); // null | 'add' | 'edit' | 'detail' | 'delete'
   const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
+
+  const debouncedSearch = useDebounce(search, 300);
+  const toast = useToast();
 
   useEffect(() => {
     loadClients();
@@ -243,7 +243,7 @@ export default function ClientsPage() {
 
   const filtered = useMemo(() => {
     let list = clients.filter(c => {
-      const q = search.toLowerCase();
+      const q = debouncedSearch.toLowerCase();
       const matchSearch = !q || c.name.toLowerCase().includes(q) || (c.email || '').toLowerCase().includes(q) || (c.phone || '').includes(q);
       const matchStatus = statusFilter === 'all' || c.status === statusFilter;
       return matchSearch && matchStatus;
@@ -258,7 +258,18 @@ export default function ClientsPage() {
     });
 
     return list;
-  }, [clients, search, statusFilter, sortBy]);
+  }, [clients, debouncedSearch, statusFilter, sortBy]);
+
+  const paginated = useMemo(() => {
+    const start = (page - 1) * pageSize;
+    return filtered.slice(start, start + pageSize);
+  }, [filtered, page]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch, statusFilter]);
 
   function openDetail(c) { setSelected(c); setModal('detail'); }
   function openEdit(c) { setSelected(c); setModal('edit'); }
@@ -269,14 +280,16 @@ export default function ClientsPage() {
     try {
       if (data.id) {
         await updateClient(data.id, data);
+        toast('Cliente actualizado correctamente', 'success');
       } else {
         await createClient(data);
+        toast('Cliente creado correctamente', 'success');
       }
       await loadClients();
       closeModal();
     } catch (err) {
       console.error(err);
-      alert('Error al guardar el cliente');
+      toast('Error al guardar el cliente', 'error');
     }
   }
 
@@ -284,19 +297,20 @@ export default function ClientsPage() {
     try {
       if (selected?.id) {
         await deleteClient(selected.id);
+        toast('Cliente eliminado correctamente', 'success');
         await loadClients();
       }
       closeModal();
     } catch (err) {
       console.error(err);
-      alert('Error al eliminar el cliente');
+      toast('Error al eliminar el cliente', 'error');
     }
   }
 
   const activeCount = clients.filter(c => c.status === 'active').length;
   const totalSpent = clients.reduce((s, c) => s + parseFloat(c.totalSpent || 0), 0);
 
-  if (loading) return <div style={{ padding: 40, textAlign: 'center' }}>Cargando clientes...</div>;
+  if (loading) return <SkeletonPage />;
 
   return (
     <div>
@@ -312,33 +326,12 @@ export default function ClientsPage() {
       </div>
 
       {/* Summary cards */}
-      <div className="clients-summary">
+      <div className="clients-summary" style={{ gridTemplateColumns: '1fr' }}>
         <div className="summary-chip">
           <span className="summary-chip-icon" style={{ background: '#6366f122', color: '#818cf8' }}>👥</span>
           <div>
             <div className="summary-chip-value">{clients.length}</div>
             <div className="summary-chip-label">Total</div>
-          </div>
-        </div>
-        <div className="summary-chip">
-          <span className="summary-chip-icon" style={{ background: '#10b98122', color: '#34d399' }}>✅</span>
-          <div>
-            <div className="summary-chip-value">{activeCount}</div>
-            <div className="summary-chip-label">Activos</div>
-          </div>
-        </div>
-        <div className="summary-chip">
-          <span className="summary-chip-icon" style={{ background: '#f43f5e22', color: '#fb7185' }}>💤</span>
-          <div>
-            <div className="summary-chip-value">{clients.length - activeCount}</div>
-            <div className="summary-chip-label">Inactivos</div>
-          </div>
-        </div>
-        <div className="summary-chip">
-          <span className="summary-chip-icon" style={{ background: '#f59e0b22', color: '#fbbf24' }}>💰</span>
-          <div>
-            <div className="summary-chip-value">${(totalSpent / 1000).toFixed(1)}k</div>
-            <div className="summary-chip-label">Ingresos totales</div>
           </div>
         </div>
       </div>
@@ -409,7 +402,7 @@ export default function ClientsPage() {
               </tr>
             </thead>
             <tbody>
-              {filtered.map(c => (
+              {paginated.map(c => (
                 <tr key={c.id} style={{ cursor: 'pointer' }} onClick={() => openDetail(c)}>
                   <td>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -465,6 +458,14 @@ export default function ClientsPage() {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {totalPages > 1 && (
+        <div className="pagination">
+          <button className="pagination-nav" disabled={page === 1} onClick={() => setPage(p => Math.max(1, p - 1))}>‹</button>
+          <span className="pagination-info">Pág. {page} de {totalPages} ({filtered.length} resultados)</span>
+          <button className="pagination-nav" disabled={page === totalPages} onClick={() => setPage(p => Math.min(totalPages, p + 1))}>›</button>
         </div>
       )}
 

@@ -20,6 +20,9 @@ export class Product {
     @Column("varchar", { nullable: true })
     category: string;
 
+    @Column("int")
+    businessId: number;
+
     @CreateDateColumn()
     createdAt: Date;
 

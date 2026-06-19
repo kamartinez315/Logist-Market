@@ -6,6 +6,9 @@ export class InventoryMovement {
     id: number;
 
     @Column("int")
+    businessId: number;
+
+    @Column("int")
     productId: number;
 
     @Column("varchar")

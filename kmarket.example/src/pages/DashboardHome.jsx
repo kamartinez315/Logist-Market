@@ -1,15 +1,41 @@
-import React, { useState, useEffect } from 'react';
-import { fetchDashboardStats, fetchClients } from '../api/apiClient';
+import React, { useState, useEffect, useCallback } from 'react';
+import { fetchDashboardStats, fetchClients, fetchTimeseries } from '../api/apiClient';
+import ChartPanel from '../components/ChartPanel';
 
-// ── KPI Card ──────────────────────────────────────────────
-function KpiCard({ label, value, sub, trend, color }) {
+// ── Metric config ─────────────────────────────────────────
+const METRIC_CONFIG = {
+  'Ingresos': { metric: 'revenue', color: '#22c55e', icon: '$', isMoney: true },
+  'Ventas totales': { metric: 'sales', color: '#3b82f6', icon: '#', isMoney: false },
+  'Beneficio bruto': { metric: 'benefit', color: '#0891b2', icon: '$', isMoney: true },
+};
+
+// ── KPI Card (clicable) ───────────────────────────────────
+function KpiCard({ label, value, sub, trend, color, isActive, onClick }) {
   const trendUp = trend >= 0;
+  const cfg = METRIC_CONFIG[label] || {};
   return (
-    <div className="kpi-card">
-      <div className="kpi-icon" style={{ background: color + '15', color }}>
-        <span style={{ fontSize: 16, fontWeight: 800 }}>
-          {label === 'Ingresos (semana)' ? '$' : label === 'Ventas hoy' ? '#' : label === 'Clientes activos' ? '◉' : '▢'}
-        </span>
+    <div
+      className="kpi-card"
+      onClick={onClick}
+      style={{
+        cursor: 'pointer',
+        borderColor: isActive ? color : undefined,
+        boxShadow: isActive ? `0 0 0 2px ${color}30, var(--shadow-sm)` : undefined,
+        position: 'relative',
+        overflow: 'hidden',
+        transition: 'all 0.18s ease',
+        userSelect: 'none',
+      }}
+    >
+      {/* active bottom indicator */}
+      {isActive && (
+        <div style={{
+          position: 'absolute', bottom: 0, left: 0, right: 0, height: 3,
+          background: color, borderRadius: '0 0 var(--radius) var(--radius)'
+        }} />
+      )}
+      <div className="kpi-icon" style={{ background: color + '18', color }}>
+        <span style={{ fontSize: 16, fontWeight: 800 }}>{cfg.icon || '▢'}</span>
       </div>
       <div className="kpi-body">
         <div className="kpi-label">{label}</div>
@@ -21,37 +47,19 @@ function KpiCard({ label, value, sub, trend, color }) {
           <span>{sub}</span>
         </div>
       </div>
-    </div>
-  );
-}
-
-// ── Bar Chart (pure CSS) ──────────────────────────────────
-function WeeklyChart({ data }) {
-  if (!data || data.length === 0) {
-    return <div style={{ height: 160, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>Sin datos esta semana</div>;
-  }
-  const max = Math.max(...data.map(d => d.sales), 1); // minimum 1 to avoid division by zero
-  return (
-    <div className="chart-container">
-      <div className="chart-bars">
-        {data.map((d, i) => (
-          <div key={i} className="chart-col">
-            <div className="chart-bar-wrap">
-              <div
-                className="chart-bar"
-                style={{ height: `${(d.sales / max) * 100}%` }}
-                title={`${d.day}: ${d.sales} ventas`}
-              >
-                <span className="chart-bar-tooltip">{d.sales}</span>
-              </div>
-            </div>
-            <div className="chart-label">{d.day}</div>
-          </div>
-        ))}
+      {/* click hint */}
+      <div style={{
+        position: 'absolute', top: 8, right: 10,
+        fontSize: 10, color: isActive ? color : 'var(--text-muted)',
+        fontWeight: 600, letterSpacing: '0.03em', opacity: isActive ? 1 : 0.6
+      }}>
+        {isActive ? '▲ ocultar' : '▼ ver gráfica'}
       </div>
     </div>
   );
 }
+
+
 
 // ── Recent Sales Table ────────────────────────────────────
 function RecentSales({ sales }) {
@@ -73,7 +81,7 @@ function RecentSales({ sales }) {
             <tr key={s.id}>
               <td><span className="badge badge-indigo">{s.id}</span></td>
               <td>{s.clientName || 'Consumidor Final'}</td>
-              <td className="text-muted text-sm">{s.date || new Date(s.createdAt).toLocaleDateString()}</td>
+              <td className="text-muted text-sm">{new Date(s.saleDate || s.createdAt).toLocaleDateString()}</td>
               <td>{paymentLabel[s.paymentMethod] || '—'}</td>
               <td style={{ textAlign: 'right', fontWeight: 700, color: '#2d8a4e' }}>
                 ${parseFloat(s.totalAmount || s.total || 0).toFixed(2)}
@@ -88,7 +96,6 @@ function RecentSales({ sales }) {
 
 // ── Low Stock Alert ───────────────────────────────────────
 function LowStockAlert({ products }) {
-  // En backend ya filtramos low stock <= 5, pero si pasan todo, filtramos aquí tmb.
   const low = products.filter(p => p.stock <= 5);
   return (
     <div className="stock-list">
@@ -143,6 +150,7 @@ export default function DashboardHome() {
   const [stats, setStats] = useState(null);
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeCard, setActiveCard] = useState(null);
 
   useEffect(() => {
     async function loadData() {
@@ -163,71 +171,75 @@ export default function DashboardHome() {
     loadData();
   }, []);
 
+  const handleCardClick = useCallback((label) => {
+    setActiveCard(prev => prev === label ? null : label);
+  }, []);
+
   if (loading || !stats) {
     return <div style={{ padding: 40, textAlign: 'center' }}>Cargando datos del dashboard...</div>;
   }
 
-  const activeClients = clients.filter(c => c.status !== 'inactive').length;
-  
-  // Use real weekly data from backend
-  const weeklyChartData = stats.weeklySales || [];
+  const kpiCards = [
+    { label: 'Ingresos', value: `$${parseFloat(stats.totalRevenue || 0).toFixed(2)}`, sub: 'total en el sistema', trend: 0 },
+    { label: 'Ventas totales', value: stats.totalSalesCount, sub: 'transacciones', trend: 0 },
+    { label: 'Beneficio bruto', value: `$${parseFloat(stats.totalProfit || 0).toFixed(2)}`, sub: 'costo vs venta de productos', trend: 0 },
+  ];
+
+  const activeConfig = activeCard ? METRIC_CONFIG[activeCard] : null;
 
   return (
     <div>
+      {/* CSS animations injected once */}
+      <style>{`
+        @keyframes fadeSlideDown {
+          from { opacity: 0; transform: translateY(-8px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
+
       {/* Page header */}
       <div className="page-header">
         <div>
           <h1 className="page-title">Dashboard</h1>
-          <p className="page-subtitle">Resumen general de tu negocio</p>
+          <p className="page-subtitle">Resumen general de tu negocio · Haz clic en una tarjeta para ver su gráfica</p>
         </div>
       </div>
 
       {/* KPI Cards */}
       <div className="kpi-grid">
-        <KpiCard
-          label="Ingresos (histórico)"
-          value={`$${parseFloat(stats.totalRevenue || 0).toFixed(2)}`}
-          sub="total en el sistema"
-          trend={0}
-          color="#00fd3f93"
-        />
-        <KpiCard
-          label="Ventas totales"
-          value={stats.totalSalesCount}
-          sub="transacciones"
-          trend={0}
-          color="#225ab3ff"
-        />
-        <KpiCard
-          label="Clientes activos"
-          value={activeClients}
-          sub={`de ${stats.totalClients} totales`}
-          trend={0}
-          color="#0891b2"
-        />
-        <KpiCard
-          label="Stock bajo"
-          value={stats.lowStockProducts.length}
-          sub="artículos"
-          trend={0}
-          color="#d97706"
-        />
+        {kpiCards.map(card => {
+          const cfg = METRIC_CONFIG[card.label] || {};
+          return (
+            <KpiCard
+              key={card.label}
+              label={card.label}
+              value={card.value}
+              sub={card.sub}
+              trend={card.trend}
+              color={cfg.color || '#6b7280'}
+              isActive={activeCard === card.label}
+              onClick={() => handleCardClick(card.label)}
+            />
+          );
+        })}
       </div>
 
-      {/* Charts row */}
-      <div className="dashboard-grid-2">
-        {/* Weekly chart */}
-        <div className="card">
-          <div className="card-header">
-            <div>
-              <div className="card-title">Ventas por día</div>
-              <div className="card-subtitle">Semana actual</div>
-            </div>
-            <span className="badge badge-green">Esta semana</span>
-          </div>
-          <WeeklyChart data={weeklyChartData} />
-        </div>
+      {/* Expandable Chart Panel */}
+      {activeCard && activeConfig && (
+        <ChartPanel
+          key={activeCard}
+          label={activeCard}
+          color={activeConfig.color}
+          isMoney={activeConfig.isMoney}
+          fetchData={(period) => fetchTimeseries(activeConfig.metric, period)}
+        />
+      )}
 
+      {/* Charts row */}
+      <div className="dashboard-grid-2" style={{ gridTemplateColumns: '1fr' }}>
         {/* Top clients */}
         <div className="card">
           <div className="card-header">

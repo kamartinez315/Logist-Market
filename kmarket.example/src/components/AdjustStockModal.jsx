@@ -78,7 +78,7 @@ export default function AdjustStockModal({ onClose, onSave, preselectedProduct =
               </div>
               <div className="form-group">
                 <label className="form-label">Cantidad *</label>
-                <input className="form-input" type="number" min="1" value={quantity} onChange={e => setQuantity(e.target.value)} required />
+                <input className="form-input" type="number" min="1" value={quantity} onChange={e => setQuantity(parseInt(e.target.value) || 1)} required />
               </div>
             </div>
 

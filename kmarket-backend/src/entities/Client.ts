@@ -32,6 +32,9 @@ export class Client {
     @Column("varchar", { nullable: true })
     lastVisit: string;
 
+    @Column("int")
+    businessId: number;
+
     @Column("int", { default: 0 })
     totalPurchases: number;
 
