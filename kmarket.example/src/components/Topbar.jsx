@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { Menu, Bell, ChevronDown } from 'lucide-react';
 
 const pageLabels = {
   home: 'Dashboard',
@@ -35,9 +36,9 @@ export default function Topbar({ activePage, collapsed, setCollapsed }) {
         <button 
           className="btn-icon mobile-menu-btn md-hidden"
           onClick={() => setCollapsed(!collapsed)}
-          style={{ border: 'none', background: 'transparent' }}
+          style={{ border: 'none', background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
         >
-          <span style={{ fontSize: 18 }}>☰</span>
+          <Menu size={18} />
         </button>
         <div className="topbar-breadcrumb">
           <span className="topbar-breadcrumb-home">KMarket</span>
@@ -51,8 +52,8 @@ export default function Topbar({ activePage, collapsed, setCollapsed }) {
           {new Date().toLocaleDateString('es-DO', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}
         </div>
 
-        <button className="btn-icon topbar-notif" title="Notificaciones">
-          <span style={{ fontSize: 14 }}>🔔</span>
+        <button className="btn-icon topbar-notif" title="Notificaciones" style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Bell size={16} />
           <span className="notif-badge">3</span>
         </button>
 
@@ -67,7 +68,7 @@ export default function Topbar({ activePage, collapsed, setCollapsed }) {
             <span className="topbar-user-name">{user?.name?.split(' ').slice(0, 2).join(' ') || 'Usuario'}</span>
             <span className="topbar-user-role">{user?.businessName || 'KMarket'}</span>
           </div>
-          <span style={{ fontSize: 10, color: '#9ca3af', marginLeft: 2 }}>▾</span>
+          <ChevronDown size={12} style={{ color: 'var(--text-muted)', marginLeft: 2 }} />
 
           {showMenu && (
             <div className="topbar-dropdown">

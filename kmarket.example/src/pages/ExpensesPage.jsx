@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { fetchExpenses, createExpense, updateExpense, deleteExpense, fetchExpenseTimeseries, fetchDashboardStats, fetchTimeseries } from '../api/apiClient';
 import ChartPanel from '../components/ChartPanel';
+import { Edit2, Plus, Save, Check, X, DollarSign } from 'lucide-react';
 
 function ExpenseModal({ expense, onClose, onSave }) {
   const isEdit = !!expense?.id;
@@ -29,7 +30,7 @@ function ExpenseModal({ expense, onClose, onSave }) {
     <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
       <div className="modal">
         <div className="modal-header">
-          <h2 className="modal-title">{isEdit ? '✏️ Editar Gasto' : '➕ Nuevo Gasto'}</h2>
+          <h2 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>{isEdit ? <Edit2 size={18} /> : <Plus size={18} />}{isEdit ? 'Editar Gasto' : 'Nuevo Gasto'}</h2>
           <button type="button" className="btn-icon" onClick={onClose}>✕</button>
         </div>
         <form onSubmit={handleSubmit}>
@@ -55,7 +56,7 @@ function ExpenseModal({ expense, onClose, onSave }) {
           </div>
           <div className="modal-footer">
             <button type="button" className="btn btn-secondary" onClick={onClose}>Cancelar</button>
-            <button type="submit" className="btn btn-primary">{isEdit ? '💾 Guardar' : '✅ Crear'}</button>
+            <button type="submit" className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>{isEdit ? <Save size={15} /> : <Check size={15} />}{isEdit ? 'Guardar' : 'Crear'}</button>
           </div>
         </form>
       </div>
@@ -73,7 +74,7 @@ function ExpenseDetail({ expense, onClose, onEdit }) {
           <button className="btn-icon" onClick={onClose}>✕</button>
         </div>
         <div className="client-detail-header" style={{ padding: '24px' }}>
-          <div className="avatar avatar-lg" style={{ background: '#f59e0b', color: '#fff', fontSize: 22 }}>💰</div>
+          <div className="avatar avatar-lg" style={{ background: '#f59e0b', color: '#fff' }}><DollarSign size={22} /></div>
           <div>
             <div style={{ fontWeight: 800, fontSize: 18 }}>{expense.description}</div>
             <span className="badge badge-yellow">${parseFloat(expense.amount).toFixed(2)}</span>

@@ -1032,3 +1032,196 @@ textarea:focus-visible {
     display: none !important;
   }
 }
+
+/* ── Chart Panel ─────────────────────────────────────── */
+.chart-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 20px 24px;
+  margin-bottom: 20px;
+  animation: chartSlide 0.25s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+@keyframes chartSlide {
+  from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.chart-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.chart-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.chart-panel-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.chart-panel-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chart-select {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 5px 28px 5px 10px;
+  font-size: 13px;
+  color: var(--text-primary);
+  background: var(--bg-card);
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%239ca3af'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  outline: none;
+  transition: var(--transition);
+}
+
+.chart-select:focus {
+  border-color: var(--accent-primary);
+}
+
+.chart-empty {
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-rose);
+  font-size: 13px;
+}
+
+.chart-loading {
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.chart-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--border-color);
+  border-top-color: var(--accent-primary);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+/* ── Dashboard page ──────────────────────────────────── */
+.dashboard-page {
+  animation: pageEnter 0.3s ease;
+}
+
+@keyframes pageEnter {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.page-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 80px 20px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.page-loading-spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--border-color);
+  border-top-color: var(--accent-primary);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+/* ── KPI Card improvements ───────────────────────────── */
+.kpi-card {
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+  user-select: none;
+  transition: all 0.2s ease;
+  border-color: var(--border-color) !important;
+}
+
+.kpi-card:hover {
+  border-color: var(--kpi-color, var(--accent-primary)) !important;
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--kpi-color, var(--accent-primary)) 20%, transparent);
+  transform: translateY(-2px);
+}
+
+.kpi-card.active {
+  border-color: var(--kpi-color, var(--accent-primary)) !important;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--kpi-color, var(--accent-primary)) 20%, transparent), var(--shadow-sm);
+}
+
+.kpi-card.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--kpi-color, var(--accent-primary));
+  border-radius: 0 0 var(--radius) var(--radius);
+}
+
+.kpi-chart-hint {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: 600;
+  opacity: 0.6;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.kpi-card:hover .kpi-chart-hint {
+  opacity: 1;
+  color: var(--kpi-color, var(--accent-primary));
+}
+
+.kpi-card.active .kpi-chart-hint {
+  opacity: 1;
+  color: var(--kpi-color, var(--accent-primary));
+}
+
+/* ── Card improvements ───────────────────────────────── */
+.card {
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+/* ── Smooth table row hover ──────────────────────────── */
+.data-table tbody tr {
+  transition: background 0.12s ease;
+}

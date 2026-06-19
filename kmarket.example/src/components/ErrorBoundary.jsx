@@ -18,7 +18,7 @@ export default class ErrorBoundary extends React.Component {
     if (this.state.hasError) {
       return (
         <div style={{ padding: 40, textAlign: 'center' }}>
-          <div style={{ fontSize: 48, marginBottom: 16 }}>⚠️</div>
+          <div style={{ fontSize: 48, marginBottom: 16, lineHeight: 1 }}>⚠</div>
           <h2 style={{ marginBottom: 8 }}>Algo salió mal</h2>
           <p style={{ color: 'var(--text-secondary)', marginBottom: 16 }}>
             Ocurrió un error inesperado. Intenta recargar la página.

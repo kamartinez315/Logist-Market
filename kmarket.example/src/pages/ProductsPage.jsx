@@ -3,6 +3,7 @@ import { fetchProducts, createProduct, updateProduct, deleteProduct } from '../a
 import { useDebounce } from '../hooks/useDebounce';
 import { useToast } from '../components/Toast';
 import { SkeletonPage } from '../components/Skeleton';
+import { Package, Plus, Edit2, Save, Check, X, BarChart3 } from 'lucide-react';
 
 function ProductModal({ product, onClose, onSave }) {
   const isEdit = !!product?.id;
@@ -31,7 +32,7 @@ function ProductModal({ product, onClose, onSave }) {
     <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
       <div className="modal">
         <div className="modal-header">
-          <h2 className="modal-title">{isEdit ? '✏️ Editar Producto' : '➕ Nuevo Producto'}</h2>
+          <h2 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>{isEdit ? <Edit2 size={18} /> : <Plus size={18} />}{isEdit ? 'Editar Producto' : 'Nuevo Producto'}</h2>
           <button type="button" className="btn-icon" onClick={onClose}>✕</button>
         </div>
         <form onSubmit={handleSubmit}>
@@ -63,7 +64,7 @@ function ProductModal({ product, onClose, onSave }) {
           </div>
           <div className="modal-footer">
             <button type="button" className="btn btn-secondary" onClick={onClose}>Cancelar</button>
-            <button type="submit" className="btn btn-primary">{isEdit ? '💾 Guardar' : '✅ Crear'}</button>
+            <button type="submit" className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>{isEdit ? <Save size={15} /> : <Check size={15} />}{isEdit ? 'Guardar' : 'Crear'}</button>
           </div>
         </form>
       </div>
@@ -81,7 +82,7 @@ function ProductDetail({ product, onClose, onEdit }) {
           <button className="btn-icon" onClick={onClose}>✕</button>
         </div>
         <div className="client-detail-header" style={{ padding: '24px' }}>
-          <div className="avatar avatar-lg" style={{ background: '#3b82f6', color: '#fff', fontSize: 22 }}>📦</div>
+          <div className="avatar avatar-lg" style={{ background: '#3b82f6', color: '#fff' }}><Package size={22} /></div>
           <div>
             <div style={{ fontWeight: 800, fontSize: 18 }}>{product.name}</div>
             <span className="badge badge-indigo">Categoría: {product.category || 'N/A'}</span>

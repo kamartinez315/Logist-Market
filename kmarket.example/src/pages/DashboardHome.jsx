@@ -1,67 +1,44 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { fetchDashboardStats, fetchClients, fetchTimeseries } from '../api/apiClient';
 import ChartPanel from '../components/ChartPanel';
+import { TrendingUp, ShoppingCart, PiggyBank, ChevronUp, ChevronDown, ChartBar } from 'lucide-react';
 
-// ── Metric config ─────────────────────────────────────────
 const METRIC_CONFIG = {
-  'Ingresos': { metric: 'revenue', color: '#22c55e', icon: '$', isMoney: true },
-  'Ventas totales': { metric: 'sales', color: '#3b82f6', icon: '#', isMoney: false },
-  'Beneficio bruto': { metric: 'benefit', color: '#0891b2', icon: '$', isMoney: true },
+  'Ingresos': { metric: 'revenue', color: '#22c55e', icon: TrendingUp, isMoney: true, gradient: 'linear-gradient(135deg, #22c55e18, #16a34a08)' },
+  'Ventas totales': { metric: 'sales', color: '#3b82f6', icon: ShoppingCart, isMoney: false, gradient: 'linear-gradient(135deg, #3b82f618, #2563eb08)' },
+  'Beneficio bruto': { metric: 'benefit', color: '#0891b2', icon: PiggyBank, isMoney: true, gradient: 'linear-gradient(135deg, #0891b218, #0e749008)' },
 };
 
-// ── KPI Card (clicable) ───────────────────────────────────
 function KpiCard({ label, value, sub, trend, color, isActive, onClick }) {
-  const trendUp = trend >= 0;
   const cfg = METRIC_CONFIG[label] || {};
+  const Icon = cfg.icon;
+  const trendUp = trend >= 0;
   return (
     <div
-      className="kpi-card"
+      className={`kpi-card ${isActive ? 'active' : ''}`}
       onClick={onClick}
-      style={{
-        cursor: 'pointer',
-        borderColor: isActive ? color : undefined,
-        boxShadow: isActive ? `0 0 0 2px ${color}30, var(--shadow-sm)` : undefined,
-        position: 'relative',
-        overflow: 'hidden',
-        transition: 'all 0.18s ease',
-        userSelect: 'none',
-      }}
+      style={{ '--kpi-color': color, '--kpi-gradient': cfg.gradient }}
     >
-      {/* active bottom indicator */}
-      {isActive && (
-        <div style={{
-          position: 'absolute', bottom: 0, left: 0, right: 0, height: 3,
-          background: color, borderRadius: '0 0 var(--radius) var(--radius)'
-        }} />
-      )}
       <div className="kpi-icon" style={{ background: color + '18', color }}>
-        <span style={{ fontSize: 16, fontWeight: 800 }}>{cfg.icon || '▢'}</span>
+        {Icon && <Icon size={20} />}
       </div>
       <div className="kpi-body">
         <div className="kpi-label">{label}</div>
         <div className="kpi-value">{value}</div>
         <div className="kpi-sub">
           <span className={`kpi-trend ${trendUp ? 'up' : 'down'}`}>
-            {trendUp ? '↑' : '↓'} {Math.abs(trend)}%
+            {trendUp ? <ChevronUp size={12} /> : <ChevronDown size={12} />} {Math.abs(trend)}%
           </span>
           <span>{sub}</span>
         </div>
       </div>
-      {/* click hint */}
-      <div style={{
-        position: 'absolute', top: 8, right: 10,
-        fontSize: 10, color: isActive ? color : 'var(--text-muted)',
-        fontWeight: 600, letterSpacing: '0.03em', opacity: isActive ? 1 : 0.6
-      }}>
-        {isActive ? '▲ ocultar' : '▼ ver gráfica'}
+      <div className="kpi-chart-hint">
+        {isActive ? '▲ ocultar' : <ChartBar size={14} />}
       </div>
     </div>
   );
 }
 
-
-
-// ── Recent Sales Table ────────────────────────────────────
 function RecentSales({ sales }) {
   const paymentLabel = { cash: 'Efectivo', card: 'Tarjeta', transfer: 'Transferencia' };
   return (
@@ -94,7 +71,6 @@ function RecentSales({ sales }) {
   );
 }
 
-// ── Low Stock Alert ───────────────────────────────────────
 function LowStockAlert({ products }) {
   const low = products.filter(p => p.stock <= 5);
   return (
@@ -123,7 +99,6 @@ function LowStockAlert({ products }) {
   );
 }
 
-// ── Top Clients ───────────────────────────────────────────
 function TopClients({ clients }) {
   const top = [...clients].sort((a, b) => Number(b.totalSpent || 0) - Number(a.totalSpent || 0)).slice(0, 5);
   return (
@@ -145,7 +120,6 @@ function TopClients({ clients }) {
   );
 }
 
-// ── Main Dashboard Page ───────────────────────────────────
 export default function DashboardHome() {
   const [stats, setStats] = useState(null);
   const [clients, setClients] = useState([]);
@@ -176,7 +150,12 @@ export default function DashboardHome() {
   }, []);
 
   if (loading || !stats) {
-    return <div style={{ padding: 40, textAlign: 'center' }}>Cargando datos del dashboard...</div>;
+    return (
+      <div className="page-loading">
+        <div className="page-loading-spinner" />
+        <span>Cargando dashboard...</span>
+      </div>
+    );
   }
 
   const kpiCards = [
@@ -188,27 +167,14 @@ export default function DashboardHome() {
   const activeConfig = activeCard ? METRIC_CONFIG[activeCard] : null;
 
   return (
-    <div>
-      {/* CSS animations injected once */}
-      <style>{`
-        @keyframes fadeSlideDown {
-          from { opacity: 0; transform: translateY(-8px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
-
-      {/* Page header */}
+    <div className="dashboard-page">
       <div className="page-header">
         <div>
           <h1 className="page-title">Dashboard</h1>
-          <p className="page-subtitle">Resumen general de tu negocio · Haz clic en una tarjeta para ver su gráfica</p>
+          <p className="page-subtitle">Resumen general de tu negocio</p>
         </div>
       </div>
 
-      {/* KPI Cards */}
       <div className="kpi-grid">
         {kpiCards.map(card => {
           const cfg = METRIC_CONFIG[card.label] || {};
@@ -227,7 +193,6 @@ export default function DashboardHome() {
         })}
       </div>
 
-      {/* Expandable Chart Panel */}
       {activeCard && activeConfig && (
         <ChartPanel
           key={activeCard}
@@ -238,9 +203,7 @@ export default function DashboardHome() {
         />
       )}
 
-      {/* Charts row */}
       <div className="dashboard-grid-2" style={{ gridTemplateColumns: '1fr' }}>
-        {/* Top clients */}
         <div className="card">
           <div className="card-header">
             <div>
@@ -253,9 +216,7 @@ export default function DashboardHome() {
         </div>
       </div>
 
-      {/* Bottom row */}
       <div className="dashboard-grid-3">
-        {/* Recent sales */}
         <div className="card" style={{ gridColumn: 'span 2' }}>
           <div className="card-header">
             <div>
@@ -266,7 +227,6 @@ export default function DashboardHome() {
           <RecentSales sales={stats.recentSales} />
         </div>
 
-        {/* Low stock */}
         <div className="card">
           <div className="card-header">
             <div>

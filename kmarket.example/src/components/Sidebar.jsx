@@ -1,28 +1,29 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
+import { LayoutDashboard, ShoppingCart, Users, Package, Boxes, DollarSign, ScrollText, Settings, ChevronLeft, LogOut } from 'lucide-react';
 
 const navItems = [
   {
     section: 'Principal',
     items: [
-      { id: 'home', label: 'Dashboard', icon: '▦' },
-      { id: 'sales', label: 'Ventas', icon: '▤' },
+      { id: 'home', label: 'Dashboard', icon: LayoutDashboard },
+      { id: 'sales', label: 'Ventas', icon: ShoppingCart },
     ],
   },
   {
     section: 'Gestión',
     items: [
-      { id: 'clients', label: 'Clientes', icon: '◉' },
-      { id: 'products', label: 'Productos', icon: '▢' },
-      { id: 'inventory', label: 'Inventario', icon: '▥' },
-      { id: 'expenses', label: 'Gastos', icon: '💰' },
+      { id: 'clients', label: 'Clientes', icon: Users },
+      { id: 'products', label: 'Productos', icon: Package },
+      { id: 'inventory', label: 'Inventario', icon: Boxes },
+      { id: 'expenses', label: 'Gastos', icon: DollarSign },
     ],
   },
   {
     section: 'Reportes',
     items: [
-      { id: 'history', label: 'Historial', icon: '📋' },
-      { id: 'settings', label: 'Configuración', icon: '⚙' },
+      { id: 'history', label: 'Historial', icon: ScrollText },
+      { id: 'settings', label: 'Configuración', icon: Settings },
     ],
   },
 ];
@@ -42,7 +43,7 @@ export default function Sidebar({ activePage, setActivePage, collapsed, setColla
         onClick={() => setCollapsed(!collapsed)}
         title={collapsed ? 'Expandir' : 'Colapsar'}
       >
-        <span style={{ display: 'inline-block', transform: collapsed ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }}>‹</span>
+        <ChevronLeft size={16} style={{ transform: collapsed ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
       </button>
 
       <nav className="sidebar-nav">
@@ -51,20 +52,23 @@ export default function Sidebar({ activePage, setActivePage, collapsed, setColla
             {!collapsed && (
               <span className="nav-section-label">{section.section}</span>
             )}
-            {section.items.map((item) => (
-              <button
-                key={item.id}
-                className={`nav-item ${activePage === item.id ? 'active' : ''}`}
-                onClick={() => setActivePage(item.id)}
-                title={collapsed ? item.label : undefined}
-              >
-                <span className="nav-icon">{item.icon}</span>
-                {!collapsed && <span className="nav-label">{item.label}</span>}
-                {activePage === item.id && !collapsed && (
-                  <span className="nav-active-dot" />
-                )}
-              </button>
-            ))}
+            {section.items.map((item) => {
+              const Icon = item.icon;
+              return (
+                <button
+                  key={item.id}
+                  className={`nav-item ${activePage === item.id ? 'active' : ''}`}
+                  onClick={() => setActivePage(item.id)}
+                  title={collapsed ? item.label : undefined}
+                >
+                  <span className="nav-icon"><Icon size={18} /></span>
+                  {!collapsed && <span className="nav-label">{item.label}</span>}
+                  {activePage === item.id && !collapsed && (
+                    <span className="nav-active-dot" />
+                  )}
+                </button>
+              );
+            })}
           </div>
         ))}
       </nav>
@@ -87,7 +91,7 @@ export default function Sidebar({ activePage, setActivePage, collapsed, setColla
           onClick={logout}
           title="Cerrar sesión"
         >
-          ⏻
+          <LogOut size={16} />
         </button>
       </div>
     </aside>

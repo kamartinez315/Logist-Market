@@ -32,10 +32,10 @@ export function ToastProvider({ children }) {
 
 function ToastItem({ toast, onRemove }) {
   const icons = {
-    success: '✅',
-    error: '❌',
-    warning: '⚠️',
-    info: 'ℹ️'
+    success: '✓',
+    error: '✕',
+    warning: '⚠',
+    info: 'i'
   };
 
   useEffect(() => {
