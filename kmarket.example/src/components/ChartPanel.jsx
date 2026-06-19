@@ -31,6 +31,7 @@ export default function ChartPanel({ label, color, isMoney = true, fetchData }) 
           <select value={chartType} onChange={e => setChartType(e.target.value)} className="chart-select">
             <option value="area">Área</option>
             <option value="line">Línea</option>
+            <option value="bar">Barras</option>
           </select>
           <select value={period} onChange={e => setPeriod(e.target.value)} className="chart-select">
             <option value="days">Días</option>

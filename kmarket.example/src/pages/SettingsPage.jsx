@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { fetchSettings, updateSettings } from '../api/apiClient';
+import { useToast } from '../components/Toast';
 
 export default function SettingsPage() {
+  const toast = useToast();
   const [activeTab, setActiveTab] = useState('general');
   const [loading, setLoading] = useState(true);
   
   // General Settings
-  const [shopName, setShopName] = useState('KMarket');
+  const [shopName, setShopName] = useState('Logistics Market');
   const [currency, setCurrency] = useState('DOP');
   
   // Appearance Settings
@@ -32,10 +34,10 @@ export default function SettingsPage() {
     e.preventDefault();
     try {
       await updateSettings({ shopName, currency });
-      alert('Configuraciones guardadas exitosamente.');
+      toast('Configuraciones guardadas exitosamente.', 'success');
     } catch (err) {
       console.error(err);
-      alert('Error al guardar configuraciones.');
+      toast('Error al guardar configuraciones.', 'error');
     }
   }
 
@@ -173,7 +175,7 @@ export default function SettingsPage() {
                 </div>
                 <div>
                   <h3 style={{ margin: 0, fontSize: 18 }}>Administrador Principal</h3>
-                  <p className="text-muted" style={{ margin: 0 }}>admin@kmarket.local</p>
+                  <p className="text-muted" style={{ margin: 0 }}>admin@logistics.local</p>
                 </div>
               </div>
               
@@ -184,7 +186,7 @@ export default function SettingsPage() {
                 </div>
                 <div className="form-group">
                   <label className="form-label">Correo Electrónico</label>
-                  <input className="form-input" type="email" value="admin@kmarket.local" disabled />
+                  <input className="form-input" type="email" value="admin@logistics.local" disabled />
                 </div>
               </div>
               

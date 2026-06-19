@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { fetchInventoryMovements, fetchInventoryStats, fetchProducts } from '../api/apiClient';
 import AdjustStockModal from '../components/AdjustStockModal';
+import { useToast } from '../components/Toast';
 import { SkeletonPage } from '../components/Skeleton';
 
 export default function InventoryPage() {
+  const toast = useToast();
   const [activeTab, setActiveTab] = useState('stock');
   const [movements, setMovements] = useState([]);
   const [products, setProducts] = useState([]);
@@ -50,7 +52,7 @@ export default function InventoryPage() {
       setProducts(prodData);
     } catch (err) {
       console.error(err);
-      alert('Error al cargar datos de inventario');
+      toast('Error al cargar datos de inventario', 'error');
     } finally {
       setLoading(false);
     }

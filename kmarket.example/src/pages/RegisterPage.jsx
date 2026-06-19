@@ -37,7 +37,7 @@ export default function RegisterPage({ onSwitchToLogin }) {
       <div className="auth-card">
         <div className="auth-logo">K</div>
         <h1 className="auth-title">Crear Negocio</h1>
-        <p className="auth-subtitle">Registra tu empresa en KMarket</p>
+        <p className="auth-subtitle">Registra tu empresa en Logistics Market</p>
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">

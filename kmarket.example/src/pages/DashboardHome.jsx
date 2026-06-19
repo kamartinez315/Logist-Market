@@ -224,7 +224,7 @@ export default function DashboardHome() {
               <div className="card-subtitle">Transacciones recientes</div>
             </div>
           </div>
-          <RecentSales sales={stats.recentSales} />
+          <RecentSales sales={stats.recentSales || []} />
         </div>
 
         <div className="card">
@@ -235,7 +235,7 @@ export default function DashboardHome() {
             </div>
             <span className="badge badge-rose">Alerta</span>
           </div>
-          <LowStockAlert products={stats.lowStockProducts} />
+          <LowStockAlert products={stats.lowStockProducts || []} />
         </div>
       </div>
     </div>

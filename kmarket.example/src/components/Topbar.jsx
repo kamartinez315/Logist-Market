@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Menu, Bell, ChevronDown } from 'lucide-react';
+import { Menu, ChevronDown } from 'lucide-react';
 
 const pageLabels = {
   home: 'Dashboard',
@@ -41,7 +41,7 @@ export default function Topbar({ activePage, collapsed, setCollapsed }) {
           <Menu size={18} />
         </button>
         <div className="topbar-breadcrumb">
-          <span className="topbar-breadcrumb-home">KMarket</span>
+          <span className="topbar-breadcrumb-home">Logistics Market</span>
           <span className="topbar-breadcrumb-sep">›</span>
           <span className="topbar-breadcrumb-current">{pageLabels[activePage] || activePage}</span>
         </div>
@@ -52,11 +52,6 @@ export default function Topbar({ activePage, collapsed, setCollapsed }) {
           {new Date().toLocaleDateString('es-DO', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}
         </div>
 
-        <button className="btn-icon topbar-notif" title="Notificaciones" style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Bell size={16} />
-          <span className="notif-badge">3</span>
-        </button>
-
         <div className="topbar-user" ref={menuRef} onClick={() => setShowMenu(!showMenu)}>
           <div
             className="avatar avatar-sm"
@@ -66,15 +61,12 @@ export default function Topbar({ activePage, collapsed, setCollapsed }) {
           </div>
           <div className="topbar-user-info">
             <span className="topbar-user-name">{user?.name?.split(' ').slice(0, 2).join(' ') || 'Usuario'}</span>
-            <span className="topbar-user-role">{user?.businessName || 'KMarket'}</span>
+            <span className="topbar-user-role">{user?.businessName || 'Logistics Market'}</span>
           </div>
           <ChevronDown size={12} style={{ color: 'var(--text-muted)', marginLeft: 2 }} />
 
           {showMenu && (
             <div className="topbar-dropdown">
-              <div className="topbar-dropdown-item">Mi perfil</div>
-              <div className="topbar-dropdown-item">Configuración</div>
-              <div className="topbar-dropdown-divider" />
               <div className="topbar-dropdown-item topbar-dropdown-danger" onClick={logout}>Cerrar sesión</div>
             </div>
           )}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { fetchExpenses, createExpense, updateExpense, deleteExpense, fetchExpenseTimeseries, fetchDashboardStats, fetchTimeseries } from '../api/apiClient';
 import ChartPanel from '../components/ChartPanel';
+import { useToast } from '../components/Toast';
 import { Edit2, Plus, Save, Check, X, DollarSign } from 'lucide-react';
 
 function ExpenseModal({ expense, onClose, onSave }) {
@@ -126,6 +127,7 @@ function ConfirmDelete({ expense, onClose, onConfirm }) {
 }
 
 export default function ExpensesPage() {
+  const toast = useToast();
   const [expenses, setExpenses] = useState([]);
   const [search, setSearch] = useState('');
   const [monthFilter, setMonthFilter] = useState('all');
@@ -151,7 +153,7 @@ export default function ExpensesPage() {
       setTotalRevenue(dashStats.totalRevenue);
     } catch (err) {
       console.error(err);
-      alert('Error al cargar gastos');
+      toast('Error al cargar gastos', 'error');
     } finally {
       setLoading(false);
     }
@@ -205,7 +207,7 @@ export default function ExpensesPage() {
       closeModal();
     } catch (err) {
       console.error(err);
-      alert('Error al guardar el gasto');
+      toast('Error al guardar el gasto', 'error');
     }
   }
 
@@ -218,7 +220,7 @@ export default function ExpensesPage() {
       closeModal();
     } catch (err) {
       console.error(err);
-      alert('Error al eliminar el gasto');
+      toast('Error al eliminar el gasto', 'error');
     }
   }
 

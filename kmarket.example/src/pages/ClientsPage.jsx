@@ -235,7 +235,7 @@ export default function ClientsPage() {
       setClients(updatedData);
     } catch (err) {
       console.error(err);
-      alert('Error al cargar clientes');
+      toast('Error al cargar clientes', 'error');
     } finally {
       setLoading(false);
     }

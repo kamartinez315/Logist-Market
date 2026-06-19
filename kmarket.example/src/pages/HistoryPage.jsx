@@ -41,8 +41,8 @@ export default function HistoryPage() {
     if (debouncedSearch.trim() !== '') {
       const term = debouncedSearch.toLowerCase();
       result = result.filter(item =>
-        item.clientName.toLowerCase().includes(term) ||
-        item.productName.toLowerCase().includes(term)
+        (item.clientName || '').toLowerCase().includes(term) ||
+        (item.productName || '').toLowerCase().includes(term)
       );
     }
 
@@ -61,8 +61,8 @@ export default function HistoryPage() {
 
   const totalPages = Math.max(1, Math.ceil(filteredHistory.length / pageSize));
 
-  const totalItemsSold = filteredHistory.reduce((acc, item) => acc + item.quantity, 0);
-  const totalAmountFiltered = filteredHistory.reduce((acc, item) => acc + item.subtotal, 0);
+  const totalItemsSold = filteredHistory.reduce((acc, item) => acc + (item.quantity || 0), 0);
+  const totalAmountFiltered = filteredHistory.reduce((acc, item) => acc + (item.subtotal || 0), 0);
 
   if (loading) return <SkeletonPage />;
 
@@ -172,9 +172,9 @@ export default function HistoryPage() {
                   <td style={{ fontWeight: 600 }}>{item.clientName}</td>
                   <td>{item.productName}</td>
                   <td style={{ textAlign: 'center' }}>{item.quantity}</td>
-                  <td style={{ textAlign: 'right' }}>${item.unitPrice.toLocaleString('es-DO', { minimumFractionDigits: 2 })}</td>
+                  <td style={{ textAlign: 'right' }}>${(item.unitPrice || 0).toLocaleString('es-DO', { minimumFractionDigits: 2 })}</td>
                   <td style={{ textAlign: 'right', fontWeight: 600, color: 'var(--accent-green)' }}>
-                    ${item.subtotal.toLocaleString('es-DO', { minimumFractionDigits: 2 })}
+                    ${(item.subtotal || 0).toLocaleString('es-DO', { minimumFractionDigits: 2 })}
                   </td>
                   <td style={{ textTransform: 'capitalize' }}>
                     {item.paymentMethod === 'cash' ? '💵 Efectivo' : item.paymentMethod === 'card' ? '💳 Tarjeta' : '🏦 Transferencia'}

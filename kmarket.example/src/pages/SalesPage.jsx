@@ -37,7 +37,7 @@ export default function SalesPage() {
 
   const totalPages = Math.max(1, Math.ceil(sales.length / pageSize));
 
-  const totalRevenue = sales.reduce((acc, sale) => acc + parseFloat(sale.totalAmount), 0);
+  const totalRevenue = sales.reduce((acc, sale) => acc + parseFloat(sale.totalAmount) || 0, 0);
 
   if (loading) return <SkeletonPage />;
 

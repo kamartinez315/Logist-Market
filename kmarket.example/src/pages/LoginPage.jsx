@@ -29,7 +29,7 @@ export default function LoginPage({ onSwitchToRegister }) {
     <div className="auth-page">
       <div className="auth-card">
         <div className="auth-logo">K</div>
-        <h1 className="auth-title">KMarket</h1>
+        <h1 className="auth-title">Logistics Market</h1>
         <p className="auth-subtitle">Inicia sesión en tu negocio</p>
 
         <form onSubmit={handleSubmit}>
@@ -38,7 +38,7 @@ export default function LoginPage({ onSwitchToRegister }) {
             <input
               className="form-input"
               type="email"
-              placeholder="admin@kmarket.com"
+              placeholder="admin@logistics.com"
               value={email}
               onChange={e => setEmail(e.target.value)}
               autoFocus

@@ -5,34 +5,34 @@ FROM node:20-alpine AS frontend-builder
 
 WORKDIR /app/frontend
 
-# Copy frontend package files and install deps
-COPY frontend/package*.json ./
+# Install dependencies
+COPY kmarket.example/package*.json ./
 RUN npm ci
 
-# Copy frontend source and build
-COPY frontend/ ./
+# Copy source and build
+COPY kmarket.example/ ./
 RUN npm run build
 
 # ─────────────────────────────────────────
-# Stage 2: Backend runtime
+# Stage 2: Build & run the backend
 # ─────────────────────────────────────────
 FROM node:20-alpine AS backend
 
 WORKDIR /app/backend
 
-# Copy backend package files and install production deps
-COPY package*.json ./
+# Install backend dependencies
+COPY kmarket-backend/package*.json ./
 RUN npm ci
 
-# Copy backend source
-COPY src/ ./src/
-COPY tsconfig.json ./
+# Copy backend source files
+COPY kmarket-backend/src/ ./src/
+COPY kmarket-backend/tsconfig.json ./
 
-# Copy built frontend from Stage 1 into public/
+# Copy compiled frontend into public/ so the backend serves it
 COPY --from=frontend-builder /app/frontend/dist ./public
 
-# Expose port (Railway injects $PORT, default 3000)
+# Railway injects $PORT at runtime — default to 3000
 EXPOSE 3000
 
-# Start the backend with tsx (runs TypeScript directly)
+# Use tsx to run TypeScript directly (no tsc compile step needed)
 CMD ["npx", "tsx", "src/index.ts"]

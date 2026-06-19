@@ -34,8 +34,7 @@ export default function Sidebar({ activePage, setActivePage, collapsed, setColla
   return (
     <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
       <div className="sidebar-logo">
-        <div className="logo-mark">K</div>
-        {!collapsed && <span className="logo-text">{user?.businessName || 'KMarket'}</span>}
+        {!collapsed && <span className="logo-text">{user?.businessName || 'Logistics Market'}</span>}
       </div>
 
       <button
@@ -83,7 +82,7 @@ export default function Sidebar({ activePage, setActivePage, collapsed, setColla
         {!collapsed && (
           <div className="sidebar-user-info">
             <div className="sidebar-user-name">{user?.name || 'Usuario'}</div>
-            <div className="sidebar-user-role">{user?.businessName || 'KMarket'}</div>
+            <div className="sidebar-user-role">{user?.businessName || 'Logistics Market'}</div>
           </div>
         )}
         <button

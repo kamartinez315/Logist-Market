@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { fetchClients, fetchProducts, createSale } from '../api/apiClient';
+import { useToast } from './Toast';
 
 export default function NewSaleModal({ onClose, onSave }) {
+  const toast = useToast();
   const [clients, setClients] = useState([]);
   const [products, setProducts] = useState([]);
   
@@ -14,6 +16,7 @@ export default function NewSaleModal({ onClose, onSave }) {
   const [loading, setLoading] = useState(true);
   const [saleDate, setSaleDate] = useState('');
   const [dateText, setDateText] = useState('');
+  const [errors, setErrors] = useState({});
 
   function formatDateInput(value) {
     const digits = value.replace(/\D/g, '').slice(0, 8);
@@ -58,7 +61,7 @@ export default function NewSaleModal({ onClose, onSave }) {
         setProducts(pData);
       } catch (err) {
         console.error(err);
-        alert('Error al cargar datos para la venta');
+        toast('Error al cargar datos para la venta', 'error');
       } finally {
         setLoading(false);
       }
@@ -73,13 +76,20 @@ export default function NewSaleModal({ onClose, onSave }) {
     const prod = products.find(p => p.id === parseInt(selectedProduct));
     if (!prod) return;
 
-    if (quantity <= 0) return alert('La cantidad debe ser mayor a 0');
-    if (quantity > prod.stock) return alert(`Stock insuficiente. Solo hay ${prod.stock} disponibles.`);
+    if (quantity <= 0) {
+      setErrors(prev => ({ ...prev, quantity: 'La cantidad debe ser mayor a 0' }));
+      return;
+    }
+    if (quantity > prod.stock) {
+      setErrors(prev => ({ ...prev, quantity: `Stock insuficiente. Solo hay ${prod.stock} disponibles.` }));
+      return;
+    }
 
     const existing = items.find(i => i.productId === prod.id);
     if (existing) {
       if (existing.quantity + quantity > prod.stock) {
-        return alert(`Stock insuficiente. Solo hay ${prod.stock} disponibles en total.`);
+        setErrors(prev => ({ ...prev, quantity: `Stock insuficiente. Solo hay ${prod.stock} disponibles en total.` }));
+        return;
       }
       setItems(items.map(i => i.productId === prod.id ? {
         ...i,
@@ -107,7 +117,8 @@ export default function NewSaleModal({ onClose, onSave }) {
   async function handleSubmit(e) {
     e.preventDefault();
     if (items.length === 0) {
-      return alert('Debe agregar al menos un producto a la venta.');
+      setErrors(prev => ({ ...prev, cart: 'Debe agregar al menos un producto a la venta.' }));
+      return;
     }
 
     try {
@@ -125,10 +136,10 @@ export default function NewSaleModal({ onClose, onSave }) {
       };
 
       await createSale(saleData);
-      onSave(); // Refreshes parent
+      onSave();
     } catch (err) {
       console.error(err);
-      alert('Error al procesar la venta');
+      toast('Error al procesar la venta', 'error');
     }
   }
 
@@ -162,7 +173,8 @@ export default function NewSaleModal({ onClose, onSave }) {
               </div>
               <div className="form-group" style={{ width: 80 }}>
                 <label className="form-label">Cant.</label>
-                <input className="form-input" type="number" min="1" value={quantity} onChange={e => setQuantity(Math.max(1, parseInt(e.target.value) || 1))} />
+                <input className="form-input" type="number" min="1" value={quantity} onChange={e => { setErrors({}); setQuantity(Math.max(1, parseInt(e.target.value) || 1)); }} />
+                {errors.quantity && <span style={{ color: 'var(--accent-rose)', fontSize: 11, marginTop: 2, display: 'block' }}>{errors.quantity}</span>}
               </div>
               <button type="button" className="btn btn-secondary" onClick={addItem} style={{ height: 42 }}>➕</button>
             </div>
@@ -194,6 +206,7 @@ export default function NewSaleModal({ onClose, onSave }) {
                   ))}
                 </tbody>
               </table>
+              {errors.cart && <span style={{ color: 'var(--accent-rose)', fontSize: 12, marginTop: 6, display: 'block' }}>{errors.cart}</span>}
             </div>
           </div>
 

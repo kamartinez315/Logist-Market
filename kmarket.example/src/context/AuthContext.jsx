@@ -41,7 +41,8 @@ export function AuthProvider({ children }) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
     });
-    const data = await res.json();
+    let data;
+    try { data = await res.json(); } catch { data = {}; }
     if (!res.ok) throw new Error(data.error || 'Error al iniciar sesión');
     localStorage.setItem('token', data.token);
     setToken(data.token);
@@ -55,7 +56,8 @@ export function AuthProvider({ children }) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, email, password, businessName }),
     });
-    const data = await res.json();
+    let data;
+    try { data = await res.json(); } catch { data = {}; }
     if (!res.ok) throw new Error(data.error || 'Error al registrarse');
     localStorage.setItem('token', data.token);
     setToken(data.token);

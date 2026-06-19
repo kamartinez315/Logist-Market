@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { fetchProducts, createInventoryMovement } from '../api/apiClient';
+import { useToast } from './Toast';
 
 export default function AdjustStockModal({ onClose, onSave, preselectedProduct = null }) {
+  const toast = useToast();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   
@@ -17,7 +19,7 @@ export default function AdjustStockModal({ onClose, onSave, preselectedProduct =
         setProducts(data);
       } catch (err) {
         console.error(err);
-        alert('Error al cargar productos');
+        toast('Error al cargar productos', 'error');
       } finally {
         setLoading(false);
       }
@@ -39,7 +41,7 @@ export default function AdjustStockModal({ onClose, onSave, preselectedProduct =
       onSave();
     } catch (err) {
       console.error(err);
-      alert('Error al registrar el movimiento. Verifique si hay stock suficiente en caso de salida.');
+      toast('Error al registrar el movimiento. Verifique si hay stock suficiente en caso de salida.', 'error');
     }
   }
 
