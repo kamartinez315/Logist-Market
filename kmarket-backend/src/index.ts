@@ -42,8 +42,11 @@ app.get("/api", (c) => {
 
 // Initialize DB and register API routes
 AppDataSource.initialize()
-    .then(() => {
+    .then(async () => {
         console.log("Data Source has been initialized!");
+
+        await AppDataSource.synchronize();
+        console.log("Database tables synchronized!");
 
         const authController = new AuthController();
         const productController = new ProductController();

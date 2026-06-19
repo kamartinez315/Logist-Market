@@ -13,18 +13,24 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const dbSync = process.env.DB_SYNC === "true";
+const dbSync = process.env.DB_SYNC !== "false";
+
+const envDbUrl = process.env.DATABASE_URL
+    || (process.env.PGHOST ? `postgresql://${process.env.PGUSER}:${process.env.PGPASSWORD}@${process.env.PGHOST}:${process.env.PGPORT}/${process.env.PGDATABASE}` : undefined);
 
 export const AppDataSource = new DataSource(
-    process.env.DATABASE_URL
+    envDbUrl
         ? {
               type: "postgres",
-              url: process.env.DATABASE_URL,
+              url: envDbUrl,
               synchronize: dbSync,
               logging: false,
               entities: [Product, Client, Sale, SaleDetail, InventoryMovement, Setting, Expense, Business, User],
               subscribers: [],
               migrations: [],
+              extra: {
+                  ssl: process.env.DB_SSL === "true" ? { rejectUnauthorized: false } : false,
+              },
           }
         : {
               type: "postgres",
