@@ -4,13 +4,19 @@ import ChartPanel from '../components/ChartPanel';
 import { useToast } from '../components/Toast';
 import { Edit2, Plus, Save, Check, X, DollarSign } from 'lucide-react';
 
-function ExpenseModal({ expense, onClose, onSave }) {
+function ExpenseModal({ expense, onClose, onSave, categories }) {
   const isEdit = !!expense?.id;
   const today = new Date().toISOString().split('T')[0];
   const [form, setForm] = useState(
     expense || {
       description: '', amount: 0, date: today, category: 'General', notes: ''
     }
+  );
+  const [isNewCategory, setIsNewCategory] = useState(
+    expense && !(categories || []).includes(expense.category)
+  );
+  const [newCategoryName, setNewCategoryName] = useState(
+    expense && !(categories || []).includes(expense.category) ? expense.category : ''
   );
 
   function set(key, val) {
@@ -52,7 +58,23 @@ function ExpenseModal({ expense, onClose, onSave }) {
             </div>
             <div className="form-group">
               <label className="form-label">Categoría</label>
-              <input className="form-input" value={form.category} onChange={e => set('category', e.target.value)} placeholder="Ej: Publicidad, Servicios, Oficina..." />
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                {!isNewCategory ? (
+                  <>
+                    <select className="form-select" value={form.category} onChange={e => set('category', e.target.value)} style={{ flex: 1 }}>
+                      {(categories || []).map(c => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </select>
+                    <button type="button" className="btn-icon" onClick={() => { setIsNewCategory(true); setNewCategoryName(''); set('category', ''); }} title="Nueva categoría">+</button>
+                  </>
+                ) : (
+                  <>
+                    <input className="form-input" value={newCategoryName} onChange={e => { setNewCategoryName(e.target.value); set('category', e.target.value); }} placeholder="Escribe nueva categoría..." style={{ flex: 1 }} autoFocus />
+                    <button type="button" className="btn-icon" onClick={() => { setIsNewCategory(false); if (!newCategoryName) set('category', categories?.[0] || ''); }} title="Cancelar">✕</button>
+                  </>
+                )}
+              </div>
             </div>
             <div className="form-group">
               <label className="form-label">Notas (opcional)</label>
@@ -143,6 +165,7 @@ export default function ExpensesPage() {
   const [activeChart, setActiveChart] = useState(false);
   const [totalRevenue, setTotalRevenue] = useState(0);
   const [activeMarginChart, setActiveMarginChart] = useState(false);
+  const [availableCategories, setAvailableCategories] = useState([]);
 
   useEffect(() => {
     loadExpenses();
@@ -151,12 +174,14 @@ export default function ExpensesPage() {
   async function loadExpenses() {
     try {
       setLoading(true);
-      const [data, dashStats] = await Promise.all([
+      const [data, dashStats, cats] = await Promise.all([
         fetchExpenses(),
-        fetchDashboardStats()
+        fetchDashboardStats(),
+        fetchExpenseCategories()
       ]);
       setExpenses(data);
       setTotalRevenue(dashStats.totalRevenue);
+      setAvailableCategories(cats);
     } catch (err) {
       console.error(err);
       toast('Error al cargar gastos', 'error');
@@ -382,7 +407,7 @@ export default function ExpensesPage() {
         </div>
       )}
 
-      {(modal === 'add' || modal === 'edit') && <ExpenseModal expense={modal === 'edit' ? selected : null} onClose={closeModal} onSave={handleSave} />}
+      {(modal === 'add' || modal === 'edit') && <ExpenseModal expense={modal === 'edit' ? selected : null} onClose={closeModal} onSave={handleSave} categories={availableCategories} />}
       {modal === 'detail' && <ExpenseDetail expense={selected} onClose={closeModal} onEdit={e => { setSelected(e); setModal('edit'); }} />}
       {modal === 'delete' && <ConfirmDelete expense={selected} onClose={closeModal} onConfirm={handleDelete} />}
     </div>
