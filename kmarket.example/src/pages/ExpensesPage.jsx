@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { fetchExpenses, createExpense, updateExpense, deleteExpense, fetchExpenseTimeseries, fetchExpenseCategories, fetchDashboardStats, fetchTimeseries } from '../api/apiClient';
+import { fetchExpenses, createExpense, updateExpense, deleteExpense, fetchExpenseTimeseries, fetchDashboardStats, fetchTimeseries } from '../api/apiClient';
 import ChartPanel from '../components/ChartPanel';
 import { useToast } from '../components/Toast';
 import { Edit2, Plus, Save, Check, X, DollarSign } from 'lucide-react';
@@ -166,7 +166,6 @@ export default function ExpensesPage() {
   const [activeChart, setActiveChart] = useState(false);
   const [totalRevenue, setTotalRevenue] = useState(0);
   const [activeMarginChart, setActiveMarginChart] = useState(false);
-  const [availableCategories, setAvailableCategories] = useState([]);
 
   useEffect(() => {
     loadExpenses();
@@ -181,7 +180,6 @@ export default function ExpensesPage() {
       ]);
       setExpenses(data);
       setTotalRevenue(dashStats.totalRevenue);
-      fetchExpenseCategories().then(setAvailableCategories).catch(() => {});
     } catch (err) {
       console.error(err);
       toast('Error al cargar gastos', 'error');
@@ -226,6 +224,11 @@ export default function ExpensesPage() {
   const categories = useMemo(() => {
     const cats = new Set(expenses.map(e => e.category).filter(Boolean));
     return ['all', ...Array.from(cats)];
+  }, [expenses]);
+
+  const modalCategories = useMemo(() => {
+    const cats = new Set(expenses.map(e => e.category).filter(Boolean));
+    return Array.from(cats);
   }, [expenses]);
 
   function openDetail(e) { setSelected(e); setModal('detail'); }
@@ -407,7 +410,7 @@ export default function ExpensesPage() {
         </div>
       )}
 
-      {(modal === 'add' || modal === 'edit') && <ExpenseModal expense={modal === 'edit' ? selected : null} onClose={closeModal} onSave={handleSave} categories={availableCategories} />}
+      {(modal === 'add' || modal === 'edit') && <ExpenseModal expense={modal === 'edit' ? selected : null} onClose={closeModal} onSave={handleSave} categories={modalCategories} />}
       {modal === 'detail' && <ExpenseDetail expense={selected} onClose={closeModal} onEdit={e => { setSelected(e); setModal('edit'); }} />}
       {modal === 'delete' && <ConfirmDelete expense={selected} onClose={closeModal} onConfirm={handleDelete} />}
     </div>
