@@ -62,6 +62,7 @@ function ExpenseModal({ expense, onClose, onSave, categories }) {
                 {!isNewCategory ? (
                   <>
                     <select className="form-select" value={form.category} onChange={e => set('category', e.target.value)} style={{ flex: 1 }}>
+                      <option value="">Seleccionar categoría...</option>
                       {(categories || []).map(c => (
                         <option key={c} value={c}>{c}</option>
                       ))}
@@ -174,14 +175,13 @@ export default function ExpensesPage() {
   async function loadExpenses() {
     try {
       setLoading(true);
-      const [data, dashStats, cats] = await Promise.all([
+      const [data, dashStats] = await Promise.all([
         fetchExpenses(),
-        fetchDashboardStats(),
-        fetchExpenseCategories()
+        fetchDashboardStats()
       ]);
       setExpenses(data);
       setTotalRevenue(dashStats.totalRevenue);
-      setAvailableCategories(cats);
+      fetchExpenseCategories().then(setAvailableCategories).catch(() => {});
     } catch (err) {
       console.error(err);
       toast('Error al cargar gastos', 'error');
